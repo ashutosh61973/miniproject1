@@ -1,0 +1,141 @@
+#include "bits/stdc++.h"
+
+using namespace std;
+#define inti long long
+#define ll long long
+const long long INF = 1e18;
+const int32_t M = 1e9 + 7;
+const int32_t mod = 1e9 + 7;
+const int32_t MM = 998244353;
+
+//Graph coloring: 0->not visited...1->visited...2->visited & processed
+bool detectCycle_util(vector<vector<int>> &adj, vector<int> &visited, int v)
+{
+    if (visited[v] == 1)
+        return true;
+    if (visited[v] == 2)
+        return false;
+
+    visited[v] = 1;
+    for (int i = 0; i < adj[v].size(); ++i)
+        if (detectCycle_util(adj, visited, adj[v][i]))
+            return true;
+
+    visited[v] = 2;
+    return false;
+}
+
+//Cycle detection
+bool detectCycle(vector<vector<int>> &adj, int n)
+{
+    vector<int> visited(n, 0);
+    for (int i = 0; i < n; ++i)
+        if (!visited[i])
+            if (detectCycle_util(adj, visited, i))
+                return true;
+    return false;
+}
+
+//Topological sort
+void dfs(vector<vector<int>> &adj, int v, vector<bool> &visited, stack<int> &mystack)
+{
+    visited[v] = true;
+    for (int i = 0; i < adj[v].size(); ++i)
+        if (!visited[adj[v][i]])
+            dfs(adj, adj[v][i], visited, mystack);
+
+    mystack.push(v);
+}
+
+vector<int> findOrder(int numCourses, vector<vector<int>> &prerequisites)
+{
+    int n = prerequisites.size();
+    vector<vector<int>> adj(numCourses);
+
+    for (int i = 0; i < n; ++i)
+        adj[prerequisites[i][1]].push_back(prerequisites[i][0]);
+
+    vector<int> ans;
+    if (detectCycle(adj, numCourses))
+        return ans;
+
+    stack<int> mystack;
+    vector<bool> visited(numCourses, false);
+
+    for (int i = 0; i < numCourses; ++i)
+        if (!visited[i])
+            dfs(adj, i, visited, mystack);
+
+    while (!mystack.empty())
+    {
+        ans.push_back(mystack.top());
+        mystack.pop();
+    }
+    return ans;
+}
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    // memset(prime, true, sizeof(prime));
+    //primes(); // primes under 1lakh
+
+    /*
+  #ifdef NCR
+		init();
+	#endif
+*/
+    int number_of_courses;
+    cout << "prequisite maker " << endl;
+    cout << "please enter the number of coureses you offer " << endl;
+    cin >> number_of_courses;
+    cout << "you enter the number = " << number_of_courses << endl;
+    unordered_map<int, string> mp;
+    unordered_map<string, int> mp1;
+    cout << "please enter the name of courses and their id" << endl;
+    //cout<<"id is unique and b/w 0 to n-1"<<endl;
+    for (int i = 0; i < number_of_courses; i++)
+    {
+        string s;
+        cin >> s;
+        mp[i] = s;
+        mp1[s] = i;
+    }
+    cout << "enter the prerequisites" << endl;
+    cout << "after entering all prerequistes please type '<done>' " << endl;
+    cout << "enter just like exaple given below";
+    cout << endl;
+    cout << "a , b" << endl;
+    cout << "b is prerequisites of a" << endl;
+    vector<vector<int>> prerequisites;
+
+    while (1)
+    {
+        string s;
+        string b;
+        cin >> s;
+        if (s == "done")
+        {
+            break;
+        }
+        cin >> b;
+        vector<int> v = {mp1[s], mp1[b]};
+        prerequisites.push_back(v);
+    }
+    //cout << "ashutosh";
+    vector<int> order = findOrder(number_of_courses, prerequisites);
+    if (order.size() == 0)
+    {
+        cout << "dead lock " << endl;
+        cout << "you never complete the courses";
+        cout << endl;
+    }
+    for (auto x : order)
+    {
+        cout << mp[x] << "-->";
+    }
+    cout << "order";
+    cout << endl;
+    cout << "FINISH :)" << endl;
+}
